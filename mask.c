@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mask.h"
 
 // When completed this file will contain several versions of the
@@ -44,8 +45,105 @@ static inline long mask1(long oldImage[N][N], long newImage[N][N], int rows, int
   // TODO This function should contain code that produces the same
   // output as baseMask, but is expected to run faster than mask0 by
   // making better use of caching.
+    
+  int i, j;
+  int col, row;
+  long check = 0;
+
+  long (*weight)[N] = calloc(N * N, sizeof(long));
   
-  return 0;
+  //initialize the new image
+  for (j = 0; j < rows; j++)
+    for (i = 0; i < cols; i++) {
+      newImage[j][i] = WEIGHT_CENTRE * oldImage[j][i];
+      weight[j][i] = WEIGHT_CENTRE;
+    }
+  
+  // Count the cells to the top left
+  for (j = 1; j < rows; j++) {
+    row = j - 1;
+    for (i = 1; i < cols; i++) {
+      col = i - 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+    }
+  }
+  
+  // Count the cells immediately above
+  for (j = 1; j < rows; j++) {
+    row = j - 1;
+    for (i = 0; i < cols; i++){
+      newImage[j][i] += WEIGHT_SIDE * oldImage[row][i];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+  
+  // Count the cells to the top right
+  for (j = 1; j < rows; j++) {
+    row = j - 1;
+    for (i = 0; i < cols - 1; i++) {
+      col = i + 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+    }
+  }
+  
+  // Count the cells to the immediate left
+  for (j = 0; j < rows; j++) {
+    for (i = 1; i < cols; i++){
+      col = i - 1;
+      newImage[j][i] += WEIGHT_SIDE * oldImage[j][col];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+  
+  // Count the cells to the immediate right
+  for (j = 0; j < rows; j++) {
+    for (i = 0; i < cols - 1; i++) {
+      col = i + 1;
+      newImage[j][i] += WEIGHT_SIDE * oldImage[j][col];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+  
+  // Count the cells to the bottom left
+  for (j = 0; j < rows - 1; j++) {
+    row = j + 1;
+     for (i = 1; i < cols; i++) {
+      col = i - 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+    }
+  }
+  
+  // Count the cells immediately below
+  for (j = 0; j < rows - 1; j++) {
+    row = j + 1;
+    for (i = 0; i < cols; i++) {
+      newImage[j][i] += WEIGHT_SIDE * oldImage[row][i];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+  
+  // Count the cells to the bottom right
+  for (j = 0; j < rows - 1; j++) {
+    row = j + 1;
+    for (i = 0; i < cols - 1; i++) {
+      col = i + 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+    }
+  }
+
+  // Produce the final result
+  
+    for (j = 0; j < rows; j++)
+      for (i = 0; i < cols; i++) {
+      newImage[j][i] = newImage[j][i] / weight[j][i];
+      check += newImage[j][i];
+    }
+  
+  return check;
 }
 
 static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int cols) {
@@ -53,8 +151,107 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
   // TODO This function should contain code that produces the same
   // output as baseMask, but is expected to run faster than mask1 (or
   // mask0) by making better use of caching.
+  int i, j;
+  int col, row;
+  long check = 0;
+
+  long (*weight)[N] = calloc(N * N, sizeof(long));
   
-  return 0;
+  //initialize the new image
+  for (j = 0; j < rows; j++)
+    for (i = 0; i < cols; i++) {
+      newImage[j][i] = WEIGHT_CENTRE * oldImage[j][i];
+      weight[j][i] = WEIGHT_CENTRE;
+    }
+  
+  // Count the cells to the top left
+  for (j = 1; j < rows; j++) {
+    row = j - 1;
+    for (i = 1; i < cols; i++) {
+      col = i - 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+    }
+  }
+  
+  // Count the cells immediately above
+  for (j = 1; j < rows; j++) {
+    row = j - 1;
+    for (i = 0; i < cols; i++){
+      newImage[j][i] += WEIGHT_SIDE * oldImage[row][i];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+  
+  // Count the cells to the top right and immediate right
+  for (j = 1; j < rows; j++) {
+    row = j - 1;
+    for (i = 0; i < cols - 1; i++) {
+      col = i + 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+      newImage[j][i] += WEIGHT_SIDE * oldImage[j][col];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+
+  //takes care of the missed first row of immediate rights
+  for (i = 0; i < cols - 1; i++) {
+      col = i + 1;
+      newImage[0][i] += WEIGHT_SIDE * oldImage[0][col];
+      weight[0][i] += WEIGHT_SIDE;
+    }
+ 
+  
+  // Count the cells to the immediate left
+  for (j = 0; j < rows; j++) {
+    for (i = 1; i < cols; i++){
+      col = i - 1;
+      newImage[j][i] += WEIGHT_SIDE * oldImage[j][col];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+  
+
+  // Count the cells to the bottom left and below
+  for (j = 0; j < rows - 1; j++) {
+    row = j + 1;
+     for (i = 1; i < cols; i++) {
+      col = i - 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+      newImage[j][i] += WEIGHT_SIDE * oldImage[row][i];
+      weight[j][i] += WEIGHT_SIDE;
+    }
+  }
+
+//counts the one column not counted by the above
+for (j = 0; j < rows - 1; j++) {
+    row = j + 1;
+    newImage[j][0] += WEIGHT_SIDE * oldImage[row][0];
+      weight[j][0] += WEIGHT_SIDE;
+  }
+
+  
+  // Count the cells to the bottom right
+  for (j = 0; j < rows - 1; j++) {
+    row = j + 1;
+    for (i = 0; i < cols - 1; i++) {
+      col = i + 1;
+      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
+      weight[j][i] += WEIGHT_CORNER;
+    }
+  }
+
+  // Produce the final result
+  
+    for (j = 0; j < rows; j++)
+      for (i = 0; i < cols; i++) {
+      newImage[j][i] = newImage[j][i] / weight[j][i];
+      check += newImage[j][i];
+    }
+  
+  return check;
 }
 
 long mask(long oldImage[N][N], long newImage[N][N], int rows, int cols) {
