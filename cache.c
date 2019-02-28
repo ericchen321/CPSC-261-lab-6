@@ -93,7 +93,8 @@ static int cache_line_check_validity_and_tag(cache_line_t *cache_line, intptr_t 
 static long cache_line_retrieve_data(cache_line_t *cache_line, size_t offset) {
   
   /* TO BE COMPLETED BY THE STUDENT */
-  return cache_line->data[offset];
+  long* returned_data = (long*) (cache_line->data + offset);
+  return *returned_data;
 }
 
 /*
