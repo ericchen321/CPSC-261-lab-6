@@ -152,7 +152,9 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
   // output as baseMask, but is expected to run faster than mask1 (or
   // mask0) by making better use of caching.
   int i, j;
-  int col, row;
+  int row, col;
+  int col_topleft, col_topright, col_immleft, col_immright; 
+  int row_topleft, row_immabove, row_topright;
   long check = 0;
 
   long (*weight)[N] = calloc(N * N, sizeof(long));
@@ -164,25 +166,50 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
       weight[j][i] = WEIGHT_CENTRE;
     }
   
-  // Count the cells to the top left
-  for (j = 1; j < rows; j++) {
-    row = j - 1;
-    for (i = 1; i < cols; i++) {
-      col = i - 1;
-      newImage[j][i] += WEIGHT_CORNER * oldImage[row][col];
-      weight[j][i] += WEIGHT_CORNER;
+  // Count the cells
+  for (j = 0; j < rows; j++) {
+    row_topleft = j - 1;
+    row_immabove = j - 1;
+    row_topright = j - 1;
+
+    for (i = 0; i < cols; i++) {
+
+      // top left
+      if(i>=1 && j>=1){
+        col_topleft = i - 1;
+        newImage[j][i] += WEIGHT_CORNER * oldImage[row_topleft][col_topleft];
+        weight[j][i] += WEIGHT_CORNER;
+      }
+
+      // immediately above
+      if(j>=1 && i>=0){
+        newImage[j][i] += WEIGHT_SIDE * oldImage[row_immabove][i];
+        weight[j][i] += WEIGHT_SIDE;
+      }
+
+      // immediate left
+      if(j>=0 && i>=1){
+        col_immleft = i - 1;
+        newImage[j][i] += WEIGHT_SIDE * oldImage[j][col_immleft];
+        weight[j][i] += WEIGHT_SIDE;
+      }
+
+      // top right
+      if(j>=1 && i>=0 && i<cols-1){
+        col_topright = i + 1;
+        newImage[j][i] += WEIGHT_CORNER * oldImage[row_topright][col_topright];
+        weight[j][i] += WEIGHT_CORNER;
+      }
+
+      // immediate right
+      if(i<cols-1){
+        col_immright = i + 1;
+        newImage[j][i] += WEIGHT_SIDE * oldImage[j][col_immright];
+        weight[j][i] += WEIGHT_SIDE;
+      }
     }
   }
-  
-  // Count the cells immediately above
-  for (j = 1; j < rows; j++) {
-    row = j - 1;
-    for (i = 0; i < cols; i++){
-      newImage[j][i] += WEIGHT_SIDE * oldImage[row][i];
-      weight[j][i] += WEIGHT_SIDE;
-    }
-  }
-  
+  /*
   // Count the cells to the top right and immediate right
   for (j = 1; j < rows; j++) {
     row = j - 1;
@@ -201,18 +228,7 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
       newImage[0][i] += WEIGHT_SIDE * oldImage[0][col];
       weight[0][i] += WEIGHT_SIDE;
     }
- 
-  
-  // Count the cells to the immediate left
-  for (j = 0; j < rows; j++) {
-    for (i = 1; i < cols; i++){
-      col = i - 1;
-      newImage[j][i] += WEIGHT_SIDE * oldImage[j][col];
-      weight[j][i] += WEIGHT_SIDE;
-    }
-  }
-  
-
+  */
   // Count the cells to the bottom left and below
   for (j = 0; j < rows - 1; j++) {
     row = j + 1;
