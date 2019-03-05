@@ -4,8 +4,11 @@
 
 #define MAX_SIZE 1024
 
+#define ARR_ROW_SIZE MAX_SIZE
+#define ARR_COL_SIZE MAX_SIZE
 
-typedef long array_t[MAX_SIZE * MAX_SIZE];
+typedef long array_t[ARR_ROW_SIZE * ARR_COL_SIZE];
+
 static cache_t *cache;
 
 /* Array used for testing. The aligned attribute is used to ensure
@@ -21,9 +24,9 @@ void fillArray(array_t a) {
   
   int i, j;
   
-  for (i = 0; i < MAX_SIZE; i++)
-    for (j = 0; j < MAX_SIZE; j++)
-      a[i * MAX_SIZE + j] = (i + 1) * 0x100 + (j + 1);
+  for (i = 0; i < ARR_ROW_SIZE; i++)
+    for (j = 0; j < ARR_COL_SIZE; j++)
+      a[i * ARR_COL_SIZE + j] = (i + 1) * 0x100 + (j + 1);
 }
 
 long sumA(array_t a, int rows, int cols) {
@@ -95,6 +98,13 @@ int main() {
   cache = cache_new(256, 64, 1, CACHE_REPLACEMENTPOLICY_LRU);
   printf("Sum = %ld\n", sumC(test_array, 64, 64));
   print_stats();
+  
+  // Part 2
+  /*
+  cache = cache_new(32, 64, 1, CACHE_REPLACEMENTPOLICY_LRU);
+  printf("Sum = %ld\n", sumB(test_array, ARR_ROW_SIZE, ARR_COL_SIZE));
+  print_stats();
+  */
 
   return 0;
 }
