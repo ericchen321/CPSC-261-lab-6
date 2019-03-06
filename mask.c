@@ -15,7 +15,7 @@
 // timemask-maskN" then run "./timemask-maskN".
 
 #ifndef MASK_VERSION
-#define MASK_VERSION mask0
+#define MASK_VERSION mask2
 #endif
 
 // You are only allowed to change the contents of this file with
