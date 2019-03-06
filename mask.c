@@ -154,6 +154,23 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
   int i, j;
   int col_topleft, col_topright, col_immleft, col_immright, col_botleft, col_botright; 
   int row_topleft, row_immabove, row_topright, row_botleft, row_immbelow, row_botright;
+  long new_image_top_left_temp,
+       new_image_imm_above_temp,
+       new_image_imm_left_temp,
+       new_image_top_right_temp,
+       new_image_imm_right_temp,
+       new_image_bot_left_temp,
+       new_image_imm_below_temp,
+       new_image_bot_right_temp,
+       weight_top_left_temp,
+       weight_imm_above_temp,
+       weight_imm_left_temp,
+       weight_top_right_temp,
+       weight_imm_right_temp,
+       weight_bot_left_temp,
+       weight_imm_below_temp,
+       weight_bot_right_temp;
+
   long check = 0;
 
   long (*weight)[N] = calloc(N * N, sizeof(long));
@@ -168,6 +185,22 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
     row_botright = j + 1;
 
     for (i = 0; i < cols; i++) {
+      new_image_top_left_temp = 0;
+      new_image_imm_above_temp = 0;
+      new_image_imm_left_temp = 0;
+      new_image_top_right_temp = 0;
+      new_image_imm_right_temp = 0;
+      new_image_bot_left_temp = 0;
+      new_image_imm_below_temp = 0;
+      new_image_bot_right_temp = 0;
+      weight_top_left_temp = 0;
+      weight_imm_above_temp = 0;
+      weight_imm_left_temp = 0;
+      weight_top_right_temp = 0;
+      weight_imm_right_temp = 0;
+      weight_bot_left_temp = 0;
+      weight_imm_below_temp = 0;
+      weight_bot_right_temp = 0;
 
       // initialize new image
       newImage[j][i] = WEIGHT_CENTRE * oldImage[j][i];
@@ -176,56 +209,73 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
       // top left
       if(i>=1 && j>=1){
         col_topleft = i - 1;
-        newImage[j][i] += WEIGHT_CORNER * oldImage[row_topleft][col_topleft];
-        weight[j][i] += WEIGHT_CORNER;
+        new_image_top_left_temp = WEIGHT_CORNER * oldImage[row_topleft][col_topleft];
+        weight_top_left_temp = WEIGHT_CORNER;
       }
 
       // immediately above
       if(j>=1 && i>=0){
-        newImage[j][i] += WEIGHT_SIDE * oldImage[row_immabove][i];
-        weight[j][i] += WEIGHT_SIDE;
+        new_image_imm_above_temp = WEIGHT_SIDE * oldImage[row_immabove][i];
+        weight_imm_above_temp = WEIGHT_SIDE;
       }
 
       // immediate left
       if(j>=0 && i>=1){
         col_immleft = i - 1;
-        newImage[j][i] += WEIGHT_SIDE * oldImage[j][col_immleft];
-        weight[j][i] += WEIGHT_SIDE;
+        new_image_imm_left_temp = WEIGHT_SIDE * oldImage[j][col_immleft];
+        weight_imm_left_temp = WEIGHT_SIDE;
       }
 
       // top right
       if(j>=1 && i>=0 && i<cols-1){
         col_topright = i + 1;
-        newImage[j][i] += WEIGHT_CORNER * oldImage[row_topright][col_topright];
-        weight[j][i] += WEIGHT_CORNER;
+        new_image_top_right_temp = WEIGHT_CORNER * oldImage[row_topright][col_topright];
+        weight_top_right_temp = WEIGHT_CORNER;
       }
 
       // immediate right
       if(i<cols-1){
         col_immright = i + 1;
-        newImage[j][i] += WEIGHT_SIDE * oldImage[j][col_immright];
-        weight[j][i] += WEIGHT_SIDE;
+        new_image_imm_right_temp = WEIGHT_SIDE * oldImage[j][col_immright];
+        weight_imm_right_temp = WEIGHT_SIDE;
       }
 
       // bottom left
       if(j<rows-1 && i>=1){
         col_botleft = i - 1;
-        newImage[j][i] += WEIGHT_CORNER * oldImage[row_botleft][col_botleft];
-        weight[j][i] += WEIGHT_CORNER;
+        new_image_bot_left_temp = WEIGHT_CORNER * oldImage[row_botleft][col_botleft];
+        weight_bot_left_temp = WEIGHT_CORNER;
       }
 
       // immediate below
       if(j<rows-1){
-        newImage[j][i] += WEIGHT_SIDE * oldImage[row_immbelow][i];
-        weight[j][i] += WEIGHT_SIDE;
+        new_image_imm_below_temp = WEIGHT_SIDE * oldImage[row_immbelow][i];
+        weight_imm_below_temp = WEIGHT_SIDE;
       }
 
       // bottom right
       if(j<rows-1 && i<cols-1){
         col_botright = i + 1;
-        newImage[j][i] += WEIGHT_CORNER * oldImage[row_botright][col_botright];
-        weight[j][i] += WEIGHT_CORNER;
+        new_image_bot_right_temp = WEIGHT_CORNER * oldImage[row_botright][col_botright];
+        weight_bot_right_temp = WEIGHT_CORNER;
       }
+
+      newImage[j][i] += (new_image_top_left_temp 
+                          + new_image_imm_above_temp 
+                          + new_image_imm_left_temp
+                          + new_image_top_right_temp
+                          + new_image_imm_right_temp
+                          + new_image_bot_left_temp
+                          + new_image_imm_below_temp
+                          + new_image_bot_right_temp);
+      weight[j][i] += (weight_top_left_temp 
+                        + weight_imm_above_temp 
+                        + weight_imm_left_temp
+                        + weight_top_right_temp
+                        + weight_imm_right_temp
+                        + weight_bot_left_temp
+                        + weight_imm_below_temp
+                        + weight_bot_right_temp);
 
       // produce results
       newImage[j][i] = newImage[j][i] / weight[j][i];
