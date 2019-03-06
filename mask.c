@@ -169,11 +169,10 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
        weight_imm_right_temp,
        weight_bot_left_temp,
        weight_imm_below_temp,
-       weight_bot_right_temp;
+       weight_bot_right_temp,
+       weight_temp;
 
   long check = 0;
-
-  long (*weight)[N] = calloc(N * N, sizeof(long));
     
   // initialize the new image, count the cells, produce results
   for (j = 0; j < rows; j++) {
@@ -204,7 +203,7 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
 
       // initialize new image
       newImage[j][i] = WEIGHT_CENTRE * oldImage[j][i];
-      weight[j][i] = WEIGHT_CENTRE;
+      weight_temp = WEIGHT_CENTRE;
 
       // top left
       if(i>=1 && j>=1){
@@ -268,7 +267,7 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
                           + new_image_bot_left_temp
                           + new_image_imm_below_temp
                           + new_image_bot_right_temp);
-      weight[j][i] += (weight_top_left_temp 
+      weight_temp += (weight_top_left_temp 
                         + weight_imm_above_temp 
                         + weight_imm_left_temp
                         + weight_top_right_temp
@@ -278,7 +277,7 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
                         + weight_bot_right_temp);
 
       // produce results
-      newImage[j][i] = newImage[j][i] / weight[j][i];
+      newImage[j][i] = newImage[j][i] / weight_temp;
       check += newImage[j][i];
     }
   }
