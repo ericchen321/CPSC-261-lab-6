@@ -154,10 +154,11 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
   // TODO This function should contain code that produces the same
   // output as baseMask, but is expected to run faster than mask1 (or
   // mask0) by making better use of caching.
-  int i, j;
-  int col_topleft, col_topright, col_immleft, col_immright, col_botleft, col_botright; 
-  int row_topleft, row_immabove, row_topright, row_botleft, row_immbelow, row_botright;
-  long new_image_top_left_temp,
+  /* Used registers for all local variables to reduce memory access */
+  register int i, j;
+  register int col_topleft, col_topright, col_immleft, col_immright, col_botleft, col_botright; 
+  register int row_topleft, row_immabove, row_topright, row_botleft, row_immbelow, row_botright;
+  register long new_image_top_left_temp,
        new_image_imm_above_temp,
        new_image_imm_left_temp,
        new_image_top_right_temp,
@@ -175,7 +176,7 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
        weight_bot_right_temp,
        weight_temp;
 
-  long check = 0;
+  register long check = 0;
     
   /* Combined new image initialization, counting and producing result in one nested for loop. 
 	 * This should make the most use of temporal locality
