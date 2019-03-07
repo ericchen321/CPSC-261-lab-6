@@ -52,6 +52,9 @@ static inline long mask1(long oldImage[N][N], long newImage[N][N], int rows, int
 
   long (*weight)[N] = calloc(N * N, sizeof(long));
   
+  /* Make the columns loop (i.e. the i variable) the inner loop for every loop.
+   * Since C is a row-major language this will drastically increase spacial locality
+   */
   //initialize the new image
   for (j = 0; j < rows; j++)
     for (i = 0; i < cols; i++) {
@@ -174,7 +177,9 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
 
   long check = 0;
     
-  // initialize the new image, count the cells, produce results
+  /* Combined new image initialization, counting and producing result in one nested for loop. 
+	 * This should make the most use of temporal locality
+   */
   for (j = 0; j < rows; j++) {
     row_topleft = j - 1;
     row_immabove = j - 1;
@@ -184,6 +189,9 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
     row_botright = j + 1;
 
     for (i = 0; i < cols; i++) {
+      /* Used temp variables to hold intermediate values of newImage[j][i]. This reduces dependency between
+	     * instructions, thus allowing CPUs to exploit more parallelism.
+       */
       new_image_top_left_temp = 0;
       new_image_imm_above_temp = 0;
       new_image_imm_left_temp = 0;
@@ -192,6 +200,10 @@ static inline long mask2(long oldImage[N][N], long newImage[N][N], int rows, int
       new_image_bot_left_temp = 0;
       new_image_imm_below_temp = 0;
       new_image_bot_right_temp = 0;
+      /* Got rid of the weight matrix since it is not required for post condition of the mask function.
+	     * Instead used weight_temp, a temporary long variable to hold weight for newImage[j][i] in each iteration.
+		   * This reduces the cache load, and has temporal locality
+       */
       weight_top_left_temp = 0;
       weight_imm_above_temp = 0;
       weight_imm_left_temp = 0;
