@@ -44,14 +44,53 @@ g. 0.125. The algorithm starts from reading a[0][0] to a[7][0]. This induces 8 c
 
 Mask Log:
 
-mask1
-	- Make the columns loop (i.e. the i variable) the inner loop for every loop
-	- Since C is a row-major language this will drastically increase spacial and temporal locality 
+Tested on lin12 server
 
-mask2
-	- Although every set of nested for loops is a tiny bit different, some have only one thing different between the two (e.g. top left vs above loops, row is the same for both, but column is different)
-	- Improve efficiency by making a new variable (col1 = i-1) and combining the two sets of for loops, instead adding a couple more lines of code in the loop.
+mask number  measurement times (usec)    average time (usec)     performance
+    0           1868607                      1861028                  1
+								1858842
+								1861626
+								1864755
+								1856049
+								1856769
+								1854747
+								1862005
+								1860334
+								1866547
 
-idea for mask3
-	- Make everything in one nested for loop. This should make the most use of locality
-		- However, will need to use many conditionals and this may outweigh any efficiency gained from the increased locality
+		1           269833                         270141               0.145
+								270272
+								268702
+								269379
+								269556
+								269131
+								268869
+								272152
+								273769
+								269749
+
+		2           145273                         145401               0.078
+								145344
+								145312
+								145174
+								145343
+								145151
+								145174
+								146063
+								145957
+								145225
+
+
+Changes:
+mask1:
+- Make the columns loop (i.e. the i variable) the inner loop for every loop.
+  Since C is a row-major language this will drastically increase spacial locality
+
+mask2:
+- Combined new image initialization, counting and producing result in one nested for loop. 
+  This should make the most use of temporal locality
+- Got rid of the weight matrix since it is not required for post condition of the mask function. 
+  Instead used weight_temp, a temporary long variable to hold weight for newImage[j][i] in each iteration. 
+	This reduces the cache load, and has temporal locality
+- Used temp variables to hold intermediate values of newImage[j][i]. This reduces dependency between 
+  instructions, thus allowing CPUs to exploit more parallelism
