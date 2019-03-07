@@ -69,17 +69,16 @@ mask number  measurement times (usec)    average time (usec)     performance
 								273769
 								269749
 
-		2           145273                         145401               0.078
-								145344
-								145312
-								145174
-								145343
-								145151
-								145174
-								146063
-								145957
-								145225
-
+		2           114316												 114384               0.061
+								114749
+								114173
+								114241
+								114357
+								114549
+								114297
+								114288
+								114537
+								114333
 
 Changes:
 mask1:
@@ -94,3 +93,4 @@ mask2:
 	This reduces the cache load, and has temporal locality
 - Used temp variables to hold intermediate values of newImage[j][i]. This reduces dependency between 
   instructions, thus allowing CPUs to exploit more parallelism
+- Used registers for all local variables to reduce memory access
